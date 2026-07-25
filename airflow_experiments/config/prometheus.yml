@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'airflow'
+    static_configs:
+      - targets: ['airflow-webserver:8080']
+    metrics_path: '/metrics'
+    # Airflow exposes StatsD metrics via statsd-exporter or built-in /metrics
+    # Enable with: AIRFLOW__METRICS__STATSD_ON=true
