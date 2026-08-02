@@ -1,0 +1,51 @@
+# Comparative-study benchmark matrix (paper Table 1). Mirrors the
+# single-system harness's config/experiment_matrix.yaml, extended with
+# per-system connection details and the "system" axis itself.
+
+systems: ["airflow", "argo", "kubeflow"]
+
+airflow:
+  base_url: "http://localhost:8080"
+  auth_username: "airflow"
+  auth_password: "airflow"
+  dag_folder_path: null   # REQUIRED before a real (non-dry-run) sweep: path the
+                           # scheduler's dag_folder watches -- local path or shared-
+                           # volume mount. See run_comparative_matrix.py::deploy_dags_airflow.
+
+argo:
+  base_url: "https://localhost:2746"
+  namespace: "argo"
+  bearer_token: null   # set via env var / secret manager in practice
+
+kubeflow:
+  host: "http://localhost:8888/pipeline"
+  namespace: null
+  existing_token: null
+
+database:
+  # Airflow's metadata DB only -- Argo/Kubeflow have no equivalent
+  # relational-DB-backed scheduler to sample (paper Section 2.2/2.4).
+  host: "localhost"
+  port: 5432
+  dbname: "airflow"
+  user: "airflow"
+  password: "airflow"
+
+sweep:
+  dag_count:      [10, 100, 1000, 5000]
+  fan_out:        [1, 50, 500]              # F=0 unsupported for Kubeflow -- see kubeflow_adapter docstring
+  short_ratio:    [0.9, 0.5]
+
+task_duration:
+  short_duration_sec: 0.5
+  long_duration_sec: 180.0
+
+run:
+  repeats: 5
+  warmup_runs: 1
+  poll_interval_sec: 2.0
+  run_timeout_sec: 3600
+
+output:
+  raw_metrics_dir: "./results/raw"
+  generated_dir: "./generated"

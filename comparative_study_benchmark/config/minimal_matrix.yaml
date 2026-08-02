@@ -1,0 +1,74 @@
+# MINIMAL VIABLE EXPERIMENT MATRIX -- deliberately reduced from the paper's
+# full Table 1 range, to fit the July 31 AoE WORKS26 deadline (6 days from
+# when this was written). This is NOT a silent substitution: paper Section
+# 6 must say explicitly that these are the actual tested ranges for this
+# submission, with the full Table 1 range stated as future work (see the
+# paper-side note this config's README section describes).
+#
+# What changed from config/comparative_matrix.yaml, and why:
+#   dag_count:   [10, 100, 1000, 5000] -> [10, 50]        (cuts N-axis run count ~12x)
+#   fan_out:     [1, 50, 500]          -> [1, 20]          (cuts F-axis run count ~1.5x,
+#                                                            and avoids very-large-F run
+#                                                            durations)
+#   short_ratio: [0.9, 0.5]            -> [0.9]            (cuts M-axis run count 2x)
+#   long_duration_sec: 180.0           -> 15.0             (the single biggest time saver:
+#                                                            a handful of 180s "long" tasks
+#                                                            per DAG was the dominant cost
+#                                                            in the full matrix's runtime
+#                                                            estimate; 15s preserves a
+#                                                            short/long *ratio* distinction
+#                                                            without the wall-clock cost --
+#                                                            report this explicitly as a
+#                                                            deviation, not hidden)
+#   repeats:     5                     -> 3                (still enough for a bootstrap CI
+#                                                            and Cliff's delta, per paper
+#                                                            Section 4.4's own methodology --
+#                                                            just a wider CI than 5 would give)
+#   warmup_runs: 1                     -> 1                (unchanged)
+#
+# Resulting run count: 2 (N) x 2 (F) x 1 (M) x 3 systems x (3 repeats + 1 warmup)
+#                     = 48 total runs, vs. 432 for the full matrix.
+
+systems: ["airflow", "argo", "kubeflow"]
+
+airflow:
+  base_url: "http://localhost:8080"
+  auth_username: "airflow"
+  auth_password: "airflow"
+  dag_folder_path: null   # SET THIS before running -- see harness README
+
+argo:
+  base_url: "https://localhost:2746"
+  namespace: "argo"
+  bearer_token: null
+
+kubeflow:
+  host: "http://localhost:8888/pipeline"
+  namespace: null
+  existing_token: null
+
+database:
+  host: "localhost"
+  port: 5432
+  dbname: "airflow"
+  user: "airflow"
+  password: "airflow"
+
+sweep:
+  dag_count:      [10, 50]
+  fan_out:        [1, 20]
+  short_ratio:    [0.9]
+
+task_duration:
+  short_duration_sec: 0.5
+  long_duration_sec: 15.0
+
+run:
+  repeats: 3
+  warmup_runs: 1
+  poll_interval_sec: 2.0
+  run_timeout_sec: 900
+
+output:
+  raw_metrics_dir: "./results/raw"
+  generated_dir: "./generated"

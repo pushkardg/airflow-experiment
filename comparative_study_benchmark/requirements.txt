@@ -1,0 +1,7 @@
+requests>=2.31
+PyYAML>=6.0
+pandas>=2.0
+numpy>=1.24
+scipy>=1.11
+kfp>=2.17          # required for the Kubeflow adapter's real compile-time validation
+psycopg2-binary>=2.9   # only needed if extending common/metrics_schema.py to sample Airflow's metadata DB
